@@ -1,0 +1,75 @@
+﻿<Page x:Class="Session2Desktop.Pages.LoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Session2Desktop.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Login">
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="1"
+                    VerticalAlignment="Center">
+
+            <TextBlock Text="Sign in to EM management"
+                       Style="{StaticResource TextTitle}"
+                       HorizontalAlignment="Center"/>
+
+            <Grid Margin="0 20 0 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Username:"
+                           Margin="5"/>
+                <TextBlock Text="Password:"
+                           Margin="5"
+                           Grid.Row="1"/>
+
+                <TextBox x:Name="TextLogin"
+                         VerticalAlignment="Center"
+                         Grid.Column="1"/>
+                <PasswordBox x:Name="TextPass"
+                             VerticalAlignment="Center"
+                             Grid.Row="1"
+                             Grid.Column="1"/>
+            </Grid>
+
+            <WrapPanel Orientation="Horizontal"
+                        Margin="0 20 0 0"
+                        HorizontalAlignment="Right">
+
+                <Button x:Name="BtnOk"
+                        Content="Ok"
+                        Click="BtnOk_Click"
+                        Style="{StaticResource BlueButton}"
+                        Width="100"
+                        Margin="10"
+                        IsDefault="True"/>
+
+                <Button x:Name="BtnCancel"
+                        Content="Cancel"
+                        Click="BtnCancel_Click"
+                        Style="{StaticResource RedButton}"
+                        Width="100"
+                        Margin="10"/>
+
+            </WrapPanel>
+            
+        </StackPanel>
+        
+    </Grid>
+</Page>

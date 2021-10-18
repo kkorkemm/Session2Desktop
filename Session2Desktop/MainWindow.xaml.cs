@@ -23,6 +23,8 @@ namespace Session2Desktop
         public MainWindow()
         {
             InitializeComponent();
+            MainFrame.Navigate(new Pages.LoginPage());
+            Navigation.MainFrame = MainFrame;
         }
     }
 }

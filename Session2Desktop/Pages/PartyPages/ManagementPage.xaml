@@ -1,0 +1,56 @@
+﻿<Page x:Class="Session2Desktop.Pages.PartyPages.ManagementPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Session2Desktop.Pages.PartyPages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Emergency Maintenance Management">
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Available Assets: "
+                   Style="{StaticResource TextTitle}"/>
+
+        <DataGrid Grid.Row="1"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  Margin="10"
+                  x:Name="GridAssets"
+                  LoadingRow="GridAssets_LoadingRow">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Asset SN"
+                                    Width="*"
+                                    Binding="{Binding AssetSN}"/>
+                <DataGridTextColumn Header="Asset Name"
+                                    Width="*"
+                                    Binding="{Binding AssetName}"/>
+                <DataGridTextColumn Header="Last Closed EM"
+                                    Width="*"
+                                    Binding="{Binding LastClosedEM}"/>
+                <DataGridTextColumn Header="Number of EMs"
+                                    Width="*"
+                                    Binding="{Binding CountEm}"/>
+            </DataGrid.Columns>
+            
+        </DataGrid>
+
+        <Button x:Name="BtnSend"
+                Click="BtnSend_Click"
+                Content="Send Emergency Maintenance Request"
+                Style="{StaticResource BlueButton}"
+                Grid.Row="2"
+                Margin="10"
+                Width="300"
+                HorizontalAlignment="Left"/>
+
+    </Grid>
+</Page>
