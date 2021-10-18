@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 
 namespace Session2Desktop
 {
+    using Base;
+
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
@@ -25,6 +27,26 @@ namespace Session2Desktop
             InitializeComponent();
             MainFrame.Navigate(new Pages.LoginPage());
             Navigation.MainFrame = MainFrame;
+        }
+
+        /// <summary>
+        /// Выход из системы
+        /// </summary>
+        private void BtnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            AppData.CurrentEmployee = null;
+            Navigation.MainFrame.Navigate(new Pages.LoginPage());
+        }
+
+        /// <summary>
+        /// Отображение кнопки Logout
+        /// </summary>
+        private void MainFrame_ContentRendered(object sender, EventArgs e)
+        {
+            if (AppData.CurrentEmployee == null)
+                BtnLogout.Visibility = Visibility.Hidden;
+            else
+                BtnLogout.Visibility = Visibility.Visible;
         }
     }
 }

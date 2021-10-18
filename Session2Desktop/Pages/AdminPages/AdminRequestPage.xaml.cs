@@ -23,7 +23,6 @@ namespace Session2Desktop.Pages.AdminPages
     public partial class AdminRequestPage : Page
     {
         EmergencyMaintenances CurrentEmergency = new EmergencyMaintenances();
-        List<ChangedParts> changedParts;
 
         public AdminRequestPage(EmergencyMaintenances emergency)
         {
@@ -33,13 +32,17 @@ namespace Session2Desktop.Pages.AdminPages
             DataContext = CurrentEmergency;
 
             ComboPart.ItemsSource = AppData.GetContext().Parts.ToList();
-            changedParts = AppData.GetContext().ChangedParts.Where(p => p.EmergencyMaintenanceID == CurrentEmergency.ID).ToList();
-            ListParts.ItemsSource = changedParts;
 
-            if (CurrentEmergency.EMEndDate != null)
-            {
-                BtnSubmit.IsEnabled = false;
-            }
+            UpdatePartTable();
+        }
+
+
+        /// <summary>
+        /// Отображение списка деталей
+        /// </summary>
+        private void UpdatePartTable()
+        {
+            ListParts.ItemsSource = AppData.GetContext().ChangedParts.Where(p => p.EmergencyMaintenanceID == CurrentEmergency.ID).ToList();
         }
 
         /// <summary>
@@ -55,14 +58,21 @@ namespace Session2Desktop.Pages.AdminPages
         /// </summary>
         private void BtnSubmit_Click(object sender, RoutedEventArgs e)
         {
+
+            // Проверка на заполнение полей и коррекность дат
             StringBuilder errors = new StringBuilder();
 
             if (CurrentEmergency.EMStartDate == null)
                 errors.AppendLine("Укажите дату начала");
 
             if (CurrentEmergency.EMEndDate != null)
+            {
                 if (string.IsNullOrWhiteSpace(CurrentEmergency.EMTechnicianNote))
                     errors.AppendLine("Дату завершения можно указать лишь в том случае, если указана записка технического специалиста");
+
+                if (CurrentEmergency.EMEndDate < CurrentEmergency.EMStartDate)
+                    errors.AppendLine("Дата завершения не может быть раньше даты начала работы по запросу");
+            }
 
             if (CurrentEmergency.EMStartDate < CurrentEmergency.EMReportDate)
                 errors.AppendLine("Дата начала работы по запросу не может быть раньше даты его регистрации");
@@ -73,6 +83,7 @@ namespace Session2Desktop.Pages.AdminPages
                 return;
             }
             
+            // Сохранение данных в базу
             try
             {
                 AppData.GetContext().SaveChanges();
@@ -89,20 +100,17 @@ namespace Session2Desktop.Pages.AdminPages
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
+            // Проверка на заполнение полей и их корректность
             StringBuilder errors = new StringBuilder();
 
             if (ComboPart.SelectedItem == null)
                 errors.AppendLine("Выберите деталь");
             if (string.IsNullOrWhiteSpace(TextAmount.Text))
                 errors.AppendLine("Укажите сумму");
-
-            bool valid = false;
-            for (int i = 0; i < TextAmount.Text.Length; i++)
-                if (char.IsDigit(TextAmount.Text[i]))
-                    valid = true;
-
-            if (!valid)
-                errors.AppendLine("Суммой должно быть положительное число");
+            if (!double.TryParse(TextAmount.Text, out _))
+                errors.AppendLine("Суммой может быть положительное число");
+            else if (Convert.ToDecimal(TextAmount.Text) < 0)
+                errors.AppendLine("Суммой может быть положительное число");
 
             if (errors.Length > 0)
             {
@@ -110,15 +118,26 @@ namespace Session2Desktop.Pages.AdminPages
                 return;
             }
 
+            // Создание и сохранение дополнительных деталей
             ChangedParts parts = new ChangedParts()
             {
                 EmergencyMaintenanceID = CurrentEmergency.ID,
                 PartID = (ComboPart.SelectedItem as Parts).ID,
-                Amount = Convert.ToInt32(TextAmount.Text)
+                Amount = Convert.ToDecimal(TextAmount.Text)
             };
 
-            changedParts.Add(parts);
-            ListParts.ItemsSource = changedParts;
+            try
+            {
+                AppData.GetContext().ChangedParts.Add(parts);
+                AppData.GetContext().SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            UpdatePartTable();
+
         }
 
         /// <summary>
@@ -126,9 +145,36 @@ namespace Session2Desktop.Pages.AdminPages
         /// </summary>
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            ChangedParts selectedPart = (sender as Button).DataContext as ChangedParts;
-            changedParts.Remove(selectedPart);
-            ListParts.ItemsSource = changedParts;
+            MessageBoxResult result = MessageBox.Show("Удалить деталь?", "Внимание!", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ChangedParts selectedPart = (sender as Button).DataContext as ChangedParts;
+
+                try
+                {
+                    AppData.GetContext().ChangedParts.Remove(selectedPart);
+                    AppData.GetContext().SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+
+                UpdatePartTable();
+            }
+        }
+
+        /// <summary>
+        /// Срок службы деталей
+        /// </summary>
+        private void ComboPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Parts part = ComboPart.SelectedItem as Parts;
+            if (part.EffectiveLife != null)
+            {
+                MessageBox.Show($"Срок службы данной детали в днях: {part.EffectiveLife}", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }
