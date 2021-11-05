@@ -9,67 +9,72 @@
       Title="Login">
 
     <Grid>
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="1"
-                    VerticalAlignment="Center">
+        <StackPanel VerticalAlignment="Center"
+                    Grid.Column="1">
+            <GroupBox Header="Sign in to EM management"
+                  VerticalAlignment="Center"
+                  Margin="10">
 
-            <TextBlock Text="Sign in to EM management"
-                       Style="{StaticResource TextTitle}"
-                       HorizontalAlignment="Center"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-            <Grid Margin="0 20 0 0">
+                    <TextBlock Text="Username: "
+                               Margin="10"/>
+                    <TextBlock Text="Password: "
+                               Grid.Row="1"
+                               Margin="10"/>
+
+                    <TextBox x:Name="TextLogin"
+                             Grid.Column="1"
+                             VerticalAlignment="Center"/>
+
+                    <PasswordBox x:Name="TextPass"
+                                 Grid.Row="1"
+                                 Grid.Column="1"
+                                 VerticalAlignment="Center"/>
+
+                </Grid>
+
+            </GroupBox>
+
+            <Grid Margin="0 10 0 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
 
-                <TextBlock Text="Username:"
-                           Margin="5"/>
-                <TextBlock Text="Password:"
-                           Margin="5"
-                           Grid.Row="1"/>
-
-                <TextBox x:Name="TextLogin"
-                         VerticalAlignment="Center"
-                         Grid.Column="1"/>
-                <PasswordBox x:Name="TextPass"
-                             VerticalAlignment="Center"
-                             Grid.Row="1"
-                             Grid.Column="1"/>
-            </Grid>
-
-            <WrapPanel Orientation="Horizontal"
-                        Margin="0 20 0 0"
-                        HorizontalAlignment="Right">
-
-                <Button x:Name="BtnOk"
+                <Button x:Name="BtnLogin"
                         Content="Ok"
-                        Click="BtnOk_Click"
                         Style="{StaticResource BlueButton}"
-                        Width="100"
-                        Margin="10"
+                        Grid.Column="1"
+                        Margin="5"
+                        Click="BtnLogin_Click"
                         IsDefault="True"/>
 
                 <Button x:Name="BtnCancel"
                         Content="Cancel"
-                        Click="BtnCancel_Click"
                         Style="{StaticResource RedButton}"
-                        Width="100"
-                        Margin="10"/>
+                        Grid.Column="2"
+                        Margin="5"
+                        Click="BtnCancel_Click"/>
 
-            </WrapPanel>
-            
+            </Grid>
+
         </StackPanel>
-        
+
     </Grid>
 </Page>

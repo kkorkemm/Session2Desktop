@@ -18,7 +18,7 @@ namespace Session2Desktop.Pages.AdminPages
     using Base;
 
     /// <summary>
-    /// Логика взаимодействия для AdminManagementPage.xaml
+    /// Логика взаимодействия для AdminEmManagementPage.xaml
     /// </summary>
     public partial class AdminManagementPage : Page
     {
@@ -26,18 +26,24 @@ namespace Session2Desktop.Pages.AdminPages
         {
             InitializeComponent();
 
-            GridAssets.ItemsSource = AppData.GetContext().EmergencyMaintenances.Where(p => p.EMEndDate == null).ToList().OrderByDescending(p => p.PriorityID).OrderBy(p => p.EMReportDate);
+            /// Список запросов сначала по приоритету, потом по дате
+            ListEMS.ItemsSource = AppData.GetContext().EmergencyMaintenances.Where(p => p.EMEndDate == null).OrderByDescending(p => p.PriorityID).ThenBy(p => p.EMReportDate).ToList();
         }
 
+        /// <summary>
+        /// Переход на страницу управления запросом
+        /// </summary>
         private void BtnManage_Click(object sender, RoutedEventArgs e)
         {
-            if (GridAssets.SelectedItem == null)
+            EmergencyMaintenances selectedEM = ListEMS.SelectedItem as EmergencyMaintenances;
+
+            if (selectedEM == null)
             {
-                MessageBox.Show("Выберите актив", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Выберите запрос");
                 return;
             }
 
-            Navigation.MainFrame.Navigate(new AdminRequestPage(GridAssets.SelectedItem as EmergencyMaintenances));
+            Navigation.MainFrame.Navigate(new AdminRequestPage(selectedEM));
         }
     }
 }

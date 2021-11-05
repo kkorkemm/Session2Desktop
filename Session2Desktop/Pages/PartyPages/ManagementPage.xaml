@@ -9,7 +9,6 @@
       Title="Emergency Maintenance Management">
 
     <Grid>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
@@ -17,14 +16,15 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="Available Assets: "
+                   Margin="10"
                    Style="{StaticResource TextTitle}"/>
 
-        <DataGrid Grid.Row="1"
-                  AutoGenerateColumns="False"
+        <DataGrid x:Name="ListAssets"
                   IsReadOnly="True"
+                  AutoGenerateColumns="False"
                   Margin="10"
-                  x:Name="GridAssets"
-                  LoadingRow="GridAssets_LoadingRow">
+                  Grid.Row="1"
+                  LoadingRow="ListAssets_LoadingRow">
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Asset SN"
@@ -36,20 +36,18 @@
                 <DataGridTextColumn Header="Last Closed EM"
                                     Width="*"
                                     Binding="{Binding LastClosedEM}"/>
-                <DataGridTextColumn Header="Number of EMs"
+                <DataGridTextColumn Header="Number of EM's"
                                     Width="*"
                                     Binding="{Binding CountEm}"/>
             </DataGrid.Columns>
-            
         </DataGrid>
 
         <Button x:Name="BtnSend"
-                Click="BtnSend_Click"
                 Content="Send Emergency Maintenance Request"
+                Click="BtnSend_Click"
                 Style="{StaticResource BlueButton}"
-                Grid.Row="2"
                 Margin="10"
-                Width="300"
+                Grid.Row="2"
                 HorizontalAlignment="Left"/>
 
     </Grid>

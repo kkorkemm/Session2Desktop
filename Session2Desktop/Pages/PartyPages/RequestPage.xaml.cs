@@ -22,53 +22,47 @@ namespace Session2Desktop.Pages.PartyPages
     /// </summary>
     public partial class RequestPage : Page
     {
-        Assets CurrentAsset = new Assets();
+        EmergencyMaintenances emergency = new EmergencyMaintenances();
 
         public RequestPage(Assets asset)
         {
             InitializeComponent();
 
-            CurrentAsset = asset;
-            DataContext = CurrentAsset;
+            ComboPriorities.ItemsSource = AppData.GetContext().Priorities.ToList();
 
-            ComboPriority.ItemsSource = AppData.GetContext().Priorities.ToList();
+            emergency.Assets = asset;
+            DataContext = emergency;
         }
 
+        /// <summary>
+        /// Отправка запроса
+        /// </summary>
         private void BtnSend_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка на заполнение полей
+            ///Проверка на заполнение полей
             StringBuilder errors = new StringBuilder();
 
-            if (ComboPriority.SelectedItem == null)
-                errors.AppendLine("Выберите приоритет");
-            if (string.IsNullOrWhiteSpace(TextDesc.Text))
-                errors.AppendLine("Укажите описание");
-            if (string.IsNullOrWhiteSpace(TextOther.Text))
-                errors.AppendLine("Укажите другие факторы");
+            if (emergency.Priorities == null)
+                errors.AppendLine("Выберите приоритет запроса");
+            if (string.IsNullOrWhiteSpace(emergency.DescriptionEmergency))
+                errors.AppendLine("Укажите описание запроса");
+            if (string.IsNullOrWhiteSpace(emergency.OtherConsiderations))
+                errors.AppendLine("Укажите другие детали запроса");
 
             if (errors.Length > 0)
             {
-                MessageBox.Show(errors.ToString(), "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(errors.ToString());
                 return;
             }
 
-            // Создание запроса
-            EmergencyMaintenances emergencyMaintenances = new EmergencyMaintenances()
-            {
-                AssetID = CurrentAsset.ID,
-                PriorityID = (ComboPriority.SelectedItem as Priorities).ID,
-                DescriptionEmergency = TextDesc.Text,
-                OtherConsiderations = TextOther.Text,
-                EMReportDate = DateTime.Now
-            };
-
-            // Сохранение в базе данных
+            /// Сохранение
             try
             {
-                AppData.GetContext().EmergencyMaintenances.Add(emergencyMaintenances);
+                emergency.EMReportDate = DateTime.Now;
+                AppData.GetContext().EmergencyMaintenances.Add(emergency);
                 AppData.GetContext().SaveChanges();
 
-                MessageBox.Show("Запрос успешно создан!", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Запрос успешно создан!");
 
                 Navigation.MainFrame.Navigate(new ManagementPage());
             }
@@ -79,7 +73,7 @@ namespace Session2Desktop.Pages.PartyPages
         }
 
         /// <summary>
-        /// Назад (Cancel)
+        /// Назад
         /// </summary>
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {

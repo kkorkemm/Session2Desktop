@@ -18,78 +18,54 @@ namespace Session2Desktop.Pages.AdminPages
     using Base;
 
     /// <summary>
-    /// Логика взаимодействия для AdminRequestPage.xaml
+    /// Логика взаимодействия для AdminManagePage.xaml
     /// </summary>
     public partial class AdminRequestPage : Page
     {
-        EmergencyMaintenances CurrentEmergency = new EmergencyMaintenances();
+        EmergencyMaintenances currentEM = new EmergencyMaintenances();
 
         public AdminRequestPage(EmergencyMaintenances emergency)
         {
             InitializeComponent();
 
-            CurrentEmergency = emergency;
-            DataContext = CurrentEmergency;
+            currentEM = emergency;
+            DataContext = currentEM;
 
-            ComboPart.ItemsSource = AppData.GetContext().Parts.ToList();
-
-            UpdatePartTable();
-        }
-
-
-        /// <summary>
-        /// Отображение списка деталей
-        /// </summary>
-        private void UpdatePartTable()
-        {
-            ListParts.ItemsSource = AppData.GetContext().ChangedParts.Where(p => p.EmergencyMaintenanceID == CurrentEmergency.ID).ToList();
-        }
-
-        /// <summary>
-        /// Назад (Cancel)
-        /// </summary>
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            Navigation.MainFrame.Navigate(new AdminManagementPage());
-        }
-
-        /// <summary>
-        /// Отправить
-        /// </summary>
-        private void BtnSubmit_Click(object sender, RoutedEventArgs e)
-        {
-
-            // Проверка на заполнение полей и коррекность дат
-            StringBuilder errors = new StringBuilder();
-
-            if (CurrentEmergency.EMStartDate == null)
-                errors.AppendLine("Укажите дату начала");
-
-            if (CurrentEmergency.EMEndDate != null)
+            if (currentEM.EMEndDate != null)
             {
-                if (string.IsNullOrWhiteSpace(CurrentEmergency.EMTechnicianNote))
-                    errors.AppendLine("Дату завершения можно указать лишь в том случае, если указана записка технического специалиста");
-
-                if (CurrentEmergency.EMEndDate < CurrentEmergency.EMStartDate)
-                    errors.AppendLine("Дата завершения не может быть раньше даты начала работы по запросу");
+                BtnSubmit.IsEnabled = false;
             }
 
-            if (CurrentEmergency.EMStartDate < CurrentEmergency.EMReportDate)
-                errors.AppendLine("Дата начала работы по запросу не может быть раньше даты его регистрации");
+            ComboParts.ItemsSource = AppData.GetContext().Parts.ToList();
+            ListParts.ItemsSource = currentEM.ChangedParts.ToList();
+        }
+
+        private void BtnSubmit_Click(object sender, RoutedEventArgs e)
+        {
+            /// Проверка правильность введенных данных
+            StringBuilder errors = new StringBuilder();
+
+            if (currentEM.EMStartDate == null)
+                errors.AppendLine("Укажите дату начала работы по запросу");
+            if (currentEM.EMEndDate != null)
+            {
+                if (currentEM.EMEndDate < currentEM.EMStartDate)
+                    errors.AppendLine("Дата начала работы по запросу не может быть позже даты ее окончания");
+                if (string.IsNullOrWhiteSpace(currentEM.EMTechnicianNote))
+                    errors.AppendLine("Перед закрытием запроса необходимо указать заметки технического специалиста");
+            }
 
             if (errors.Length > 0)
             {
-                MessageBox.Show(errors.ToString(), "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(errors.ToString());
                 return;
             }
-            
-            // Сохранение данных в базу
+
+            // Сохранение
             try
             {
                 AppData.GetContext().SaveChanges();
-
-                MessageBox.Show("Информация о запросе успешно сохранена!", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                MessageBox.Show("Детали о запросе сохранены!");
                 Navigation.MainFrame.Navigate(new AdminManagementPage());
             }
             catch (Exception ex)
@@ -98,83 +74,56 @@ namespace Session2Desktop.Pages.AdminPages
             }
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Назад
+        /// </summary>
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка на заполнение полей и их корректность
+            Navigation.MainFrame.Navigate(new AdminManagementPage());
+        }
+
+        private void BtnAddList_Click(object sender, RoutedEventArgs e)
+        {
             StringBuilder errors = new StringBuilder();
 
-            if (ComboPart.SelectedItem == null)
+            if (ComboParts.SelectedItem == null)
                 errors.AppendLine("Выберите деталь");
             if (string.IsNullOrWhiteSpace(TextAmount.Text))
-                errors.AppendLine("Укажите сумму");
-            if (!double.TryParse(TextAmount.Text, out _))
-                errors.AppendLine("Суммой может быть положительное число");
-            else if (Convert.ToDecimal(TextAmount.Text) < 0)
-                errors.AppendLine("Суммой может быть положительное число");
-
-            if (errors.Length > 0)
-            {
-                MessageBox.Show(errors.ToString(), "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            // Создание и сохранение дополнительных деталей
-            ChangedParts parts = new ChangedParts()
-            {
-                EmergencyMaintenanceID = CurrentEmergency.ID,
-                PartID = (ComboPart.SelectedItem as Parts).ID,
-                Amount = Convert.ToDecimal(TextAmount.Text)
-            };
+                errors.AppendLine("Укажите количество деталей");
 
             try
             {
-                AppData.GetContext().ChangedParts.Add(parts);
-                AppData.GetContext().SaveChanges();
+                decimal count = Convert.ToDecimal(TextAmount.Text);
+                if (count < 1)
+                    errors.AppendLine("Количество должно быть положительным числом больше нуля");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show(ex.Message);
+                errors.AppendLine("Количество должно быть положительным числом");
             }
 
-            UpdatePartTable();
+            if (errors.Length > 0)
+            {
+                MessageBox.Show(errors.ToString());
+                return;
+            }
 
+            ChangedParts newPart = new ChangedParts()
+            {
+                EmergencyMaintenanceID = currentEM.ID,
+                Parts = ComboParts.SelectedItem as Parts,
+                Amount = Convert.ToDecimal(TextAmount.Text)
+            };
+
+            currentEM.ChangedParts.Add(newPart);
+            ListParts.ItemsSource = currentEM.ChangedParts.ToList();
         }
 
-        /// <summary>
-        /// Удаление частей
-        /// </summary>
-        private void BtnRemove_Click(object sender, RoutedEventArgs e)
+        private void BtnRemoveList_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show("Удалить деталь?", "Внимание!", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                ChangedParts selectedPart = (sender as Button).DataContext as ChangedParts;
-
-                try
-                {
-                    AppData.GetContext().ChangedParts.Remove(selectedPart);
-                    AppData.GetContext().SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-
-                UpdatePartTable();
-            }
-        }
-
-        /// <summary>
-        /// Срок службы деталей
-        /// </summary>
-        private void ComboPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Parts part = ComboPart.SelectedItem as Parts;
-            if (part.EffectiveLife != null)
-            {
-                MessageBox.Show($"Срок службы данной детали в днях: {part.EffectiveLife}", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            ChangedParts selectedPart = (sender as Button).DataContext as ChangedParts;
+            AppData.GetContext().ChangedParts.Remove(selectedPart);
+            ListParts.ItemsSource = currentEM.ChangedParts.ToList();
         }
     }
 }

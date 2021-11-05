@@ -27,55 +27,41 @@ namespace Session2Desktop.Pages
             InitializeComponent();
         }
 
-        /// <summary>
-        /// Вход (Ok)
-        /// </summary>
-        private void BtnOk_Click(object sender, RoutedEventArgs e)
+        private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка на заполнение полей
-
             StringBuilder errors = new StringBuilder();
 
             if (string.IsNullOrWhiteSpace(TextLogin.Text))
-                errors.AppendLine("Введите логин");
+                errors.AppendLine("Введите свой логин");
             if (string.IsNullOrWhiteSpace(TextPass.Password))
                 errors.AppendLine("Введите пароль");
 
             if (errors.Length > 0)
             {
-                MessageBox.Show(errors.ToString(), "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(errors.ToString());
                 return;
             }
 
-            // Поиск пользователя
+            Employees user = AppData.GetContext().Employees.FirstOrDefault(p => p.Username == TextLogin.Text && p.Password == TextPass.Password);
 
-            List<Employees> employees = AppData.GetContext().Employees.Where(p => p != null).ToList();
-
-            Employees currentEmployee = employees.Where(p => p.Username == TextLogin.Text && p.Password == TextPass.Password).FirstOrDefault();
-
-            if (currentEmployee == null)
+            if (user == null)
             {
-                MessageBox.Show("Неверное соответствие логина и пароля!", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Неверное соответствие логина и пароля");
                 return;
             }
 
-            // Навигация
+            AppData.CurrentEmployee = user;
 
-            AppData.CurrentEmployee = currentEmployee;
-
-            if (currentEmployee.isAdmin != true)
-            {
-                Navigation.MainFrame.Navigate(new PartyPages.ManagementPage());
-            }
-            else
+            if (user.isAdmin == true)
             {
                 Navigation.MainFrame.Navigate(new AdminPages.AdminManagementPage());
             }
+            else
+            {
+                Navigation.MainFrame.Navigate(new PartyPages.ManagementPage());
+            }
         }
 
-        /// <summary>
-        /// Отмена (Cancel)
-        /// </summary>
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             TextLogin.Text = "";

@@ -18,7 +18,7 @@ namespace Session2Desktop.Pages.PartyPages
     using Base;
 
     /// <summary>
-    /// Логика взаимодействия для ManagementPage.xaml
+    /// Логика взаимодействия для EmManagementPage.xaml
     /// </summary>
     public partial class ManagementPage : Page
     {
@@ -26,41 +26,44 @@ namespace Session2Desktop.Pages.PartyPages
         {
             InitializeComponent();
 
-            GridAssets.ItemsSource = AppData.GetContext().Assets.Where(p => p.EmployeeID == AppData.CurrentEmployee.ID).ToList();
+            List<Assets> assets = AppData.GetContext().Assets.Where(p => p.EmployeeID == AppData.CurrentEmployee.ID).ToList();
+
+            ListAssets.ItemsSource = assets;
         }
 
         /// <summary>
-        /// Переход на страницу создания нового запроса
+        /// Переход на страницу создания запроса
         /// </summary>
         private void BtnSend_Click(object sender, RoutedEventArgs e)
         {
-            // Выбор актива для создание запроса
-            if (GridAssets.SelectedItem == null)
+            var selectedAsset = ListAssets.SelectedItem as Assets;
+
+            if (selectedAsset == null)
             {
-                MessageBox.Show("Выберите актив", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Выберите актив");
                 return;
             }
 
-            // Проверка на наличие открытых запросов
-            Assets asset = GridAssets.SelectedItem as Assets;
-            if (asset.LastClosedEM == "--")
+            if (selectedAsset.LastClosedEM != "--" || selectedAsset.CountEm == 0)
             {
-                MessageBox.Show("Актив имеет открытый запрос", "Внимание!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                Navigation.MainFrame.Navigate(new RequestPage(selectedAsset));
             }
-
-            Navigation.MainFrame.Navigate(new RequestPage(asset));
+            else
+            {
+                MessageBox.Show("Данный актив имеет открытый запрос");
+            }
         }
 
         /// <summary>
-        /// Выделение активов с незавершенными запросами
+        /// Закрашивание строк
         /// </summary>
-        private void GridAssets_LoadingRow(object sender, DataGridRowEventArgs e)
+        private void ListAssets_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            DataGridRow row = e.Row;
-            Assets assets = row.Item as Assets;
-            if (assets.LastClosedEM == "--")
+            Assets asset = e.Row.Item as Assets;
+            if (asset.LastClosedEM == "--" && asset.CountEm > 0)
+            {
                 e.Row.Background = Brushes.Red;
+            }
         }
     }
 }

@@ -12,10 +12,10 @@ namespace Session2Desktop.Base
         {
             get
             {
-                EmergencyMaintenances emergencyMaintenances = EmergencyMaintenances.ToList().OrderBy(p => p.ID).LastOrDefault();
+                EmergencyMaintenances emergencyMaintenances = EmergencyMaintenances.ToList().OrderBy(p => p.EMReportDate).LastOrDefault();
 
                 if (emergencyMaintenances != null && emergencyMaintenances.EMEndDate != null)
-                    return emergencyMaintenances.EMEndDate.ToString();
+                    return Convert.ToDateTime(emergencyMaintenances.EMEndDate).ToString("yyyy/MM/dd").Replace(".", "/");
                 else
                     return "--";
             }
